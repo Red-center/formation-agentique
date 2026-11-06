@@ -1,0 +1,10 @@
+# Projet : <nom> — <une phrase : ce que fait le dépôt>
+## Stack : <langage, version, framework principal>
+## Lancer : <commande pour démarrer en local>
+## Tests : <commande exacte, ex. pytest -q / npm test> — doivent être verts avant de conclure
+## Lint/format : <commande, ou "aucun">
+## Arborescence utile : <2-3 dossiers clés et leur rôle>
+## Règles : corriger la cause ; ne jamais modifier un test pour le faire passer ; diff minimal
+## Interdits : <fichiers/dossiers à ne pas toucher, ex. migrations/, secrets, .env>
+## Conventions : <nommage, langue des commentaires, style de commit>
+## Avant de finir : résumer cause / correction / test en 3 lignes
