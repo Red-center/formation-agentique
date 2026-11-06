@@ -1,8 +1,0 @@
-Warning: this sign-in ends between 2026-11-11 and 2026-11-14 (in 5 days at the earliest). Renewing it does not move those dates. Run claude auth login before then, or use claude setup-token for unattended jobs.
-C'est corrigé : `pytest -q` passe (5 tests verts).
-
-- **Cause :** `nombre_de_pages` (`boutique/catalogue.py:25`) arrondissait le nombre de pages vers le bas avec `nb_produits // taille_page`. Avec 25 produits et 10 par page, on obtenait 2 pages au lieu de 3, et la page 3, qui contient les 5 derniers produits, était refusée comme « hors limites ».
-- **Correction :** le calcul arrondit maintenant vers le haut : `-(-nb_produits // taille_page)`. C'est la seule ligne modifiée.
-- **Test qui le prouve :** `test_derniere_page_incomplete_est_accessible` reproduit le ticket (25 produits, page 3 → R021 à R025). Il échouait avant la correction et passe maintenant. Le cas était déjà couvert, donc je n'ai pas ajouté de test.
-
-Rien n'a été commité.
