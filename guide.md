@@ -51,11 +51,17 @@ Variantes par outil :
 **Claude Code sans modèle Anthropic** : Claude Code peut parler à l'endpoint OpenCode Go (DeepSeek, etc.) au lieu des modèles Anthropic, par variables d'environnement :
 
 ```bash
-export ANTHROPIC_BASE_URL="<url de l'endpoint OpenCode Go compatible Anthropic>"
-export ANTHROPIC_AUTH_TOKEN="$OPENCODE_GO_KEY"   # clé lue depuis votre gestionnaire de secrets, jamais en clair dans le dépôt
-export ANTHROPIC_MODEL="<modèle, ex. deepseek-...>"
+# Clé OpenCode Go lue depuis votre gestionnaire de secrets (ou ~/.local/share/opencode/auth.json), jamais affichée ni commitée
+export ANTHROPIC_BASE_URL="https://opencode.ai/inference/go/anthropic"   # pas /zen/go (401)
+export ANTHROPIC_AUTH_TOKEN="$OPENCODE_GO_KEY"
+export ANTHROPIC_API_KEY=""                                             # vide : force l'usage du token ci-dessus
+export ANTHROPIC_MODEL="deepseek-v4.1-flash"
+export ANTHROPIC_SMALL_FAST_MODEL="deepseek-v4.1-flash"
+export CLAUDE_CONFIG_DIR="$HOME/.claude-opencode-go"                    # config isolée de votre Claude Code habituel
 claude
 ```
+
+Notes : un avertissement `unrecognized_model` de Claude Code est sans conséquence ; un `429 Go usage limit exceeded` signifie quota hebdomadaire OpenCode Go épuisé. Liste des modèles : `GET https://opencode.ai/zen/go/v1/models` avec la clé en Bearer.
 
 Message pédagogique : **la méthode (instructions + tests + revue de diff) ne dépend ni de l'outil ni du modèle.**
 
