@@ -22,7 +22,7 @@ def nombre_de_pages(nb_produits: int, taille_page: int) -> int:
         raise ValueError("taille_page doit être > 0")
     if nb_produits == 0:
         return 1
-    return nb_produits // taille_page
+    return -(-nb_produits // taille_page)
 
 
 def paginer(produits: list, numero: int, taille_page: int = 10) -> Page:
