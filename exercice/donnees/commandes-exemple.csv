@@ -1,0 +1,9 @@
+commande,produit,prix_unitaire,quantite,remise_pct,tva_pct
+C001,Cahier A4,3.50,4,0,20
+C001,Stylo bleu,1.20,10,10,20
+C002,Livre de poche,8.90,2,0,5.5
+C002,Marque-page,0.80,3,0,20
+C003,Gomme,1.15,3,50,20
+C003,Règle 30 cm,2.40,1,0,20
+C004,Agenda 2027,14.00,1,25,20
+C005,Ramette papier,5.49,5,0,20

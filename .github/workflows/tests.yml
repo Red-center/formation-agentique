@@ -1,10 +1,10 @@
-name: tests
+name: exercise-check
 on:
   push:
-    branches: ["participant/**"]
+    branches: [master]
   pull_request:
 jobs:
-  pytest:
+  check:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -14,5 +14,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pytest
-      - run: pytest -q
+      - run: make install
+      - run: make test
+      - run: make mutants
+      - name: Surviving mutants exist (the exercise needs some)
+        run: test "$(.venv/bin/mutmut results | grep -c survived)" -gt 0

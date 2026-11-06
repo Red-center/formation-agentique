@@ -1,7 +1,11 @@
-# POC — Formation agentique, niveau 1
+# Formation agentique — niveau 1 : « Comprendre, corriger, prouver »
 
-- `exercice/` : appli Python avec un vrai bug (pagination), `pytest -q` rouge ; `CLAUDE.md` = `AGENTS.md`.
-- `CLAUDE.md.template` : 10 lignes à remplir pour son propre dépôt.
-- `guide.md` : déroulé, commandes Claude Code / Codex / OpenCode, grille de revue, risques.
-- `suivi-a-distance.md` : branches + CI + tableau de statut.
-- `demo/run-claude.md` : exécution réelle (avant/après, diff).
+Mini-projet de pratique avec un agent de code (Claude Code, Codex CLI, OpenCode ou Mistral Vibe). Tout se fait en local.
+
+- `guide.md` : le déroulé en 3 parties, les commandes, l'outil à utiliser.
+- `exercice/` : l'appli de facturation, ses tests, `RAPPORT.md` à remplir, `CLAUDE.md` = `AGENTS.md`.
+- `CLAUDE.md.template` : 10 lignes pour écrire le fichier d'instructions de votre propre dépôt.
+
+```bash
+cd exercice && make install && make test
+```
