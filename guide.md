@@ -42,10 +42,12 @@ Dans `exercice/` (après `pip install pytest`). Interactif d'abord, puis la vari
 | Claude Code | `CLAUDE.md` | `claude` | `claude -p "Corrige le bug du ticket ; pytest -q doit passer." --permission-mode acceptEdits --allowedTools "Bash(pytest*)" Read Edit` |
 | Codex CLI | `AGENTS.md` | `codex` | `codex exec --full-auto "Corrige le bug du ticket ; pytest -q doit passer."` |
 | OpenCode | `AGENTS.md` | `opencode` | `opencode run "Corrige le bug du ticket ; pytest -q doit passer."` |
+| Mistral Vibe | `AGENTS.md` | `vibe` | `vibe -p "Corrige le bug du ticket ; pytest -q doit passer." --workdir . --trust --auto-approve --max-turns 15 --max-price 1 < /dev/null` |
 
 Variantes par outil :
 - **Claude Code** : mode plan (`Shift+Tab`) pour faire proposer avant de modifier ; `/init` génère un premier `CLAUDE.md` à corriger à la main.
 - **Codex CLI** : sandbox par défaut ; `--full-auto` = écriture dans le dépôt + exécution locale, sans réseau. `/init` crée un `AGENTS.md`.
+- **Mistral Vibe** : modèle Mistral (mistral-large par défaut) ; `-p` = non interactif, garde-fous `--max-turns`, `--max-price`, `--enabled-tools` ; sans `--auto-approve`, l'approbation des outils suit l'agent choisi (`--agent`). Démo : `demo/run-vibe.md`.
 - **OpenCode** : multi-fournisseurs, choix du modèle avec `/models` ou `opencode run -m <fournisseur/modèle>` ; `/init` crée `AGENTS.md`.
 
 **Claude Code sans modèle Anthropic** : Claude Code peut parler à l'endpoint OpenCode Go (DeepSeek, etc.) au lieu des modèles Anthropic, par variables d'environnement :
