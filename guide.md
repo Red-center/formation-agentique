@@ -1,54 +1,60 @@
-# Formation agentique — Niveau 1 : « Le premier bug corrigé »
+# Mini-projet 1 : « Comprendre, corriger, prouver »
 
-Public : développeurs qui utilisent un chat IA mais jamais un agent. Durée : une demi-journée.
-Objectif : chacun écrit le fichier d'instructions de son dépôt, un agent corrige un vrai bug, on relit son diff ensemble.
+> Niveau 1, environ 2 h, tout se fait **en local**. Avec Claude Code, Codex CLI, OpenCode ou Mistral Vibe : même exercice.
+> Ce qu'on entraîne : **votre méthode avec un agent**. Dans chaque partie, quatre gestes : **cadrer** la tâche, **exiger des preuves**, **vérifier** par le comportement, les tests et les résultats, **décider** ce qu'on accepte ou refuse. On ne relit pas le code ligne à ligne.
 
-## 1. Chat vs agent : la boucle change de mains
+**Le dépôt :** `exercice/`, une petite appli de facturation que vous n'avez jamais vue (import CSV de commandes, totaux avec remises et TVA, export). Ses tests sont tous verts. Un client écrit : *« Sur certaines commandes, le total facturé est faux de quelques centimes. »*
+
+## Démarrer
+
+```bash
+cd exercice
+make install     # crée .venv, installe pytest et mutmut
+make test        # tous les tests passent
+make total       # totaux de donnees/commandes-exemple.csv
+```
+
+Sans `make` : `python3 -m venv .venv && .venv/bin/pip install pytest mutmut`, puis `.venv/bin/pytest -q`, `.venv/bin/python -m facturation total donnees/commandes-exemple.csv`, `.venv/bin/mutmut run`, `.venv/bin/mutmut results`.
 
 ```mermaid
 flowchart LR
-  subgraph Chat["Chat IA (ce que vous faites déjà)"]
-    A1[Vous copiez le code] --> A2[Le modèle propose] --> A3[Vous collez, lancez, copiez l'erreur] --> A1
-  end
-  subgraph Agent["Agent (ce qu'on apprend)"]
-    B1[Vous: objectif + règles] --> B2[L'agent lit le dépôt]
-    B2 --> B3[Il modifie les fichiers] --> B4[Il lance les tests]
-    B4 -- rouge --> B2
-    B4 -- vert --> B5[Vous relisez le diff]
-  end
+    C["1 · Découvrir<br/>35 min"] --> A["2 · Corriger<br/>50 min"] --> D["3 · Prouver les tests<br/>30 min"] --> R["RAPPORT.md<br/>5 min"]
 ```
 
-Différence clé : dans le chat, **vous** êtes la boucle (copier/coller/exécuter). Avec un agent, la boucle tourne seule ; votre travail se déplace **avant** (cadrer : fichier d'instructions, critère de fin = tests) et **après** (relire le diff).
+## 1 · Découvrir le code par son comportement (35 min)
 
-## 2. Les 4 étapes
+- **Cadrer :** agent en **lecture seule / plan**. Demandez-lui comment on installe, lance et teste l'appli, ce que fait chaque commande, et de **prédire la sortie** de 5 situations (un CSV vide, une quantité négative, une colonne manquante…).
+- **Exiger des preuves :** pour chaque affirmation, sur quoi elle repose (fichier lu, commande lancée).
+- **Vérifier :** lancez vous-même `make total FICHIER=...` sur ces situations et comparez.
+- **Décider :** gardez ce qui est confirmé dans le fichier d'instructions (`CLAUDE.md` ou `AGENTS.md`), notez dans `RAPPORT.md` ce qui était juste ou faux.
 
-```mermaid
-flowchart LR
-  E1["1. Écrire CLAUDE.md / AGENTS.md"] --> E2["2. Demander à l'agent"] --> E3["3. Lancer les tests"] --> E4["4. Relire le diff"]
-  E4 -- refus --> E2
-```
+## 2 · Corriger le problème du client (50 min)
 
-1. **Fichier d'instructions** — `CLAUDE.md` (Claude Code) ou `AGENTS.md` (Codex CLI, OpenCode). Même contenu : projet, commande de test, règles. Partir de `CLAUDE.md.template` (10 lignes). Astuce : garder un seul fichier et faire `ln -s CLAUDE.md AGENTS.md`.
-2. **Demander** — une phrase : le symptôme (le ticket), le critère de fin (« `pytest -q` doit passer »). Ne pas dicter la solution.
-3. **Tester soi-même** — relancer `pytest -q` : on ne croit pas l'agent sur parole.
-4. **Relire le diff** — `git diff`, grille en 5 questions (§4). Accepter = commit ; refuser = relancer avec une consigne précise.
+- **Cadrer :** demandez à l'agent de **reproduire** le problème : trouver quelles données le déclenchent et écrire un test qui échoue. Pas de correction avant ce test rouge.
+- **Exiger des preuves :** le test rouge avant, vert après (`make test`) ; la cause en une phrase.
+- **Vérifier :** relancez vous-même les tests et `make total` : total avant/après, et **deux cas que vous inventez**.
+- **Décider :** acceptez seulement si la cause expliquée colle à ce que vous observez ; sinon, refusez et recadrez.
 
-## 3. Commandes par outil
+## 3 · Vérifier que les tests protègent vraiment (30 min)
 
-Dans `exercice/` (après `pip install pytest`). Interactif d'abord, puis la variante non interactive (« headless ») pour la démo.
+- **Cadrer :** demandez à l'agent de lancer le test par mutation (`make mutants` puis `make survivants`) : l'outil `mutmut` introduit de petites erreurs dans le code et regarde si les tests les attrapent ([dépôt](https://github.com/boxed/mutmut)).
+- **Exiger des preuves :** pour 3 mutants survivants, le **comportement qu'ils casseraient**, montré par une exécution.
+- **Vérifier et décider :** relancez `make mutants` après les tests ajoutés ; acceptez un test s'il fait tomber le mutant, refusez ceux qui ne vérifient rien.
 
-| Outil | Lit | Interactif | Headless |
-|---|---|---|---|
-| Claude Code | `CLAUDE.md` | `claude` | `claude -p "Corrige le bug du ticket ; pytest -q doit passer." --permission-mode acceptEdits --allowedTools "Bash(pytest*)" Read Edit` |
-| Codex CLI | `AGENTS.md` | `codex` | `codex exec --full-auto "Corrige le bug du ticket ; pytest -q doit passer."` |
-| OpenCode | `AGENTS.md` | `opencode` | `opencode run "Corrige le bug du ticket ; pytest -q doit passer."` |
-| Mistral Vibe | `AGENTS.md` | `vibe` | `vibe -p "Corrige le bug du ticket ; pytest -q doit passer." --workdir . --trust --auto-approve --max-turns 15 --max-price 1 < /dev/null` |
+## Le rendu
 
-Variantes par outil :
-- **Claude Code** : mode plan (`Shift+Tab`) pour faire proposer avant de modifier ; `/init` génère un premier `CLAUDE.md` à corriger à la main.
-- **Codex CLI** : sandbox par défaut ; `--full-auto` = écriture dans le dépôt + exécution locale, sans réseau. `/init` crée un `AGENTS.md`.
-- **Mistral Vibe** : modèle Mistral (mistral-large par défaut) ; `-p` = non interactif, garde-fous `--max-turns`, `--max-price`, `--enabled-tools` ; sans `--auto-approve`, l'approbation des outils suit l'agent choisi (`--agent`). Démo : `demo/run-vibe.md`.
-- **OpenCode** : multi-fournisseurs, choix du modèle avec `/models` ou `opencode run -m <fournisseur/modèle>` ; `/init` crée `AGENTS.md`.
+Remplissez `exercice/RAPPORT.md` et joignez la trace de session.
+
+## Selon votre outil (vérifié le 06/11/2026 sur les docs officielles)
+
+| | Claude Code | Codex CLI | OpenCode | Mistral Vibe |
+|---|---|---|---|---|
+| Fichier d'instructions | `CLAUDE.md`, `/init` — [doc](https://code.claude.com/docs/en/memory) | `AGENTS.md`, `/init` — [doc](https://developers.openai.com/codex/learn/best-practices) | `AGENTS.md`, `/init` — [doc](https://opencode.ai/docs/rules/) | `AGENTS.md` — [doc](https://github.com/mistralai/mistral-vibe) |
+| Lancer | `claude` | `codex` | `opencode` | `vibe` |
+| Lecture seule (partie 1) | Mode `plan` (Shift+Tab) — [doc](https://code.claude.com/docs/en/permission-modes) | `/plan`, sandbox `read-only` — [doc](https://learn.chatgpt.com/docs/agent-approvals-security?surface=cli) | Agent Plan (Tab) — [doc](https://opencode.ai/docs/agents/) | Agent `ask` — [doc](https://github.com/mistralai/mistral-vibe) |
+| Trace à rendre | `/export` (pas de page officielle trouvée, à tester) | Historique sous `CODEX_HOME` — [doc](https://learn.chatgpt.com/docs/agent-approvals-security?surface=cli) | `opencode export <session> --sanitize` — [doc](https://opencode.ai/docs/cli/) | `~/.vibe/logs/<session>/messages.jsonl` — [doc](https://github.com/mistralai/mistral-vibe) |
+
+### Variante : Claude Code sans modèle Anthropic
 
 **Claude Code sans modèle Anthropic** : Claude Code peut parler à l'endpoint OpenCode Go (DeepSeek, etc.) au lieu des modèles Anthropic, par variables d'environnement :
 
@@ -67,24 +73,5 @@ Notes : un avertissement `unrecognized_model` de Claude Code est sans conséquen
 
 Message pédagogique : **la méthode (instructions + tests + revue de diff) ne dépend ni de l'outil ni du modèle.**
 
-## 4. Grille de revue du diff (critères de réussite)
-
-| # | Question | Réussi si |
-|---|---|---|
-| 1 | La **cause** est-elle corrigée, ou seulement le symptôme ? | On sait expliquer le bug en une phrase et le diff le vise. |
-| 2 | Les **tests** sont-ils intacts et verts ? | Aucun test supprimé/affaibli ; `pytest -q` vert relancé par vous. |
-| 3 | Le diff est-il **minimal** ? | Pas de refactoring, reformatage ou fichier hors sujet. |
-| 4 | Les **cas limites** tiennent-ils ? | Ex. : 0 produit, nombre exact de pages, page hors limites. |
-| 5 | Pourriez-vous **défendre ce diff en revue** d'équipe ? | Vous le comprenez ligne à ligne, sans l'agent. |
-
-5/5 = commit. Un seul « non » = refus motivé, renvoyé à l'agent.
-
-## 5. Limites et risques
-
-- **Confiance excessive** : un agent affirme « c'est corrigé » même quand ce n'est pas vrai → les tests et la relecture font foi.
-- **Tricher sur les tests** : modifier l'assertion au lieu du code. Interdit dans le fichier d'instructions, vérifié par la question 2.
-- **Permissions** : un agent exécute des commandes. Démarrer en mode qui demande confirmation ; limiter les outils autorisés en headless.
-- **Secrets** : ne jamais mettre de clé dans `CLAUDE.md`/`AGENTS.md` ni dans le prompt ; l'agent lit tout le dépôt (`.env` compris).
-- **Code et données envoyés au fournisseur** : vérifier la politique de l'entreprise avant de lancer un agent sur un dépôt client.
-- **Coût et quotas** : chaque boucle consomme des tokens ; un quota épuisé arrête l'outil (prévoir un 2e outil).
-- **Non-déterminisme** : deux participants n'obtiendront pas le même diff — c'est une matière de discussion, pas un problème.
+> **Pour aller plus loin (niveau suivant, facultatif, hors mini-projet 1)**
+> Une façon de faire parmi d'autres : répartir les rôles entre plusieurs modèles, par exemple l'un écrit les tests, un autre écrit le code, un troisième vérifie. Ça peut donner une chaîne plus solide et coûter moins cher, puisque chaque rôle n'a pas besoin du modèle le plus gros. C'est une idée ouverte à essayer, pas une recette ni une norme.

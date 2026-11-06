@@ -1,0 +1,15 @@
+[project]
+name = "facturation"
+version = "0.3.0"
+description = "Petit outil de facturation : lit des commandes en CSV, calcule les totaux, exporte."
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.mutmut]
+source_paths = ["facturation/"]
+pytest_add_cli_args_test_selection = ["tests/"]
+also_copy = ["donnees/"]
+do_not_mutate = ["facturation/__main__.py", "facturation/export.py"]
